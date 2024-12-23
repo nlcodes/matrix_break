@@ -1,0 +1,16 @@
+# Executable
+matrix_break
+
+# Build output
+build/
+*.o
+*.d
+*.out
+
+# Vim/Neovim
+*.swp
+*.swo
+*.~
+
+# SDL
+*.dll
