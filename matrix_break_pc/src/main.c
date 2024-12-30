@@ -28,22 +28,22 @@ typedef struct {
 /* Shape templates 3d array */
 const uint8_t SHAPES[][4][4] = {
   {
+    {1,1,1,1},
     {0,0,0,0},
     {0,0,0,0},
-    {0,0,0,0},
-    {1,1,1,1}
+    {0,0,0,0}
   },
   {
+    {1,0,0,0},
     {0,0,0,0},
     {0,0,0,0},
-    {0,0,0,0},
-    {1,0,0,0}
+    {0,0,0,0}
   },
   {
-    {0,0,0,0},
-    {0,0,0,0},
     {1,1,0,0},
-    {1,1,0,0}
+    {1,1,0,0},
+    {0,0,0,0},
+    {0,0,0,0}
   }
 };
 
@@ -52,8 +52,8 @@ Shape* create_shape() {
   Shape* new_shape = malloc(sizeof(Shape));
 
   /* Init x, y, rotation */
-  new_shape->x = 30;
-  new_shape->y = 6;
+  new_shape->x = (MATRIX_WIDTH / 2) * BLOCK_SIZE;
+  new_shape->y = 0;
   new_shape->rotation = 0;
 
   /* Pick random shape */
@@ -114,7 +114,7 @@ int main() {
   /* Create current playing shape and state variables */
   Shape* current_shape = create_shape();
   unsigned int last_drop_time = SDL_GetTicks();
-  const int DROP_SPEED = 500;
+  const unsigned int DROP_SPEED = 500;
 
   /* Create SDL event for polling and variable for game loop on/off */
   int running = 1;
@@ -142,13 +142,33 @@ int main() {
     
     /* Render border */ 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_Rect border = {
+
+    /* Left Border */
+    SDL_Rect left_border = {
       0,
       0,
-      16 * BLOCK_SIZE,
+      BLOCK_SIZE,
       MATRIX_HEIGHT * BLOCK_SIZE
     };
-    SDL_RenderDrawRect(renderer, &border);
+    SDL_RenderFillRect(renderer, &left_border);
+
+    /* Right Border */
+    SDL_Rect right_border = {
+      MATRIX_WIDTH * BLOCK_SIZE,
+      0,
+      BLOCK_SIZE,
+      MATRIX_HEIGHT * BLOCK_SIZE
+    };
+    SDL_RenderFillRect(renderer, &right_border);
+
+    /* Bottom Border */
+    SDL_Rect bottom_border = {
+      0,
+      MATRIX_HEIGHT * BLOCK_SIZE,
+      (MATRIX_WIDTH + 1) * BLOCK_SIZE,
+      BLOCK_SIZE 
+    };
+    SDL_RenderFillRect(renderer, &bottom_border);
 
     /* Render current shape */
     render_shape(renderer, current_shape);
