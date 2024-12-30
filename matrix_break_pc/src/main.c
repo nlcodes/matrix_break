@@ -69,6 +69,7 @@ Shape* create_shape() {
   return new_shape;
 }
 
+/* Move shape function */
 void move_shape(Shape* shape, int dx, int dy) {
   shape->x += (dx * BLOCK_SIZE);
   shape->y += (dy * BLOCK_SIZE);
@@ -91,6 +92,20 @@ void render_shape(SDL_Renderer* renderer, const Shape* shape) {
       }
     }
   }
+}
+
+int scan_bottom_collision(const Shape* shape) {
+  for(int i = 0; i < 4; i++) {
+    for(int j = 0; j < 4; j++) {
+      if(shape->shape[i][j]) {
+        int block_bottom = shape->y + ((i + 1) * BLOCK_SIZE);
+        if (block_bottom >= MATRIX_HEIGHT * BLOCK_SIZE) {
+          return 1;
+        }
+      }
+    }
+  }
+  return 0;
 }
 
 int main() {
@@ -129,10 +144,20 @@ int main() {
       }
     }
 
-    /* Drop current shape */
+    /* Drop current shape 
+     * Drop test shape to see if current shape will hit floor next drop
+     */
     unsigned int current_time = SDL_GetTicks();
     if(current_time - last_drop_time > DROP_SPEED) {
-      move_shape(current_shape, 0, 1);
+      Shape test_shape = *current_shape;
+      move_shape(&test_shape, 0, 1);
+
+      if(scan_bottom_collision(&test_shape)) {
+        free(current_shape);
+        current_shape = create_shape();
+      } else {
+        move_shape(current_shape, 0, 1);
+      }
       last_drop_time = current_time;
     }
 
@@ -143,7 +168,7 @@ int main() {
     /* Render border */ 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-    /* Left Border */
+    /* Left border */
     SDL_Rect left_border = {
       0,
       0,
@@ -152,7 +177,7 @@ int main() {
     };
     SDL_RenderFillRect(renderer, &left_border);
 
-    /* Right Border */
+    /* Right border */
     SDL_Rect right_border = {
       MATRIX_WIDTH * BLOCK_SIZE,
       0,
@@ -161,7 +186,7 @@ int main() {
     };
     SDL_RenderFillRect(renderer, &right_border);
 
-    /* Bottom Border */
+    /* Bottom border */
     SDL_Rect bottom_border = {
       0,
       MATRIX_HEIGHT * BLOCK_SIZE,
