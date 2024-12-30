@@ -47,9 +47,12 @@ const uint8_t SHAPES[][4][4] = {
   }
 };
 
+/* Init game matrix array to host placed shapes */
+uint8_t game_matrix[MATRIX_WIDTH][MATRIX_HEIGHT] = {0};
+
 /* Create shape function */
-Shape* create_shape() {
-  Shape* new_shape = malloc(sizeof(Shape));
+Shape *create_shape() {
+  Shape *new_shape = malloc(sizeof(Shape));
 
   /* Init x, y, rotation */
   new_shape->x = (MATRIX_WIDTH / 2) * BLOCK_SIZE;
@@ -70,13 +73,13 @@ Shape* create_shape() {
 }
 
 /* Move shape function */
-void move_shape(Shape* shape, int dx, int dy) {
+void move_shape(Shape *shape, int dx, int dy) {
   shape->x += (dx * BLOCK_SIZE);
   shape->y += (dy * BLOCK_SIZE);
 }
 
 /* Render shape function */
-void render_shape(SDL_Renderer* renderer, const Shape* shape) {
+void render_shape(SDL_Renderer *renderer, const Shape *shape) {
   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
   for(int i = 0; i < 4; i++) {
@@ -94,7 +97,8 @@ void render_shape(SDL_Renderer* renderer, const Shape* shape) {
   }
 }
 
-int scan_bottom_collision(const Shape* shape) {
+/* Floor collision detection */
+int scan_bottom_collision(const Shape *shape) {
   for(int i = 0; i < 4; i++) {
     for(int j = 0; j < 4; j++) {
       if(shape->shape[i][j]) {
@@ -106,6 +110,38 @@ int scan_bottom_collision(const Shape* shape) {
     }
   }
   return 0;
+}
+
+/* Place shapes into matrix once hit detected with floor */
+void place_shape(const Shape *shape) {
+  for(int i = 0; i < 4; i++) {
+    for(int j = 0; j < 4; j++) {
+      if(shape->shape[i][j]) {
+        int matrix_x = shape->x / BLOCK_SIZE + j;
+        int matrix_y = shape->y / BLOCK_SIZE + i + 1;
+        game_matrix[matrix_x][matrix_y] = 1;
+      }
+    }
+  }
+}
+
+/* Render matrix/matrix shapes */
+void render_matrix(SDL_Renderer *renderer) {
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+  for(int i = 0; i < MATRIX_WIDTH; i++) {
+    for(int j = 0; j < MATRIX_HEIGHT; j++) {
+      if(game_matrix[i][j]) {
+        SDL_Rect block = {
+          i * BLOCK_SIZE,
+          j * BLOCK_SIZE,
+          BLOCK_SIZE,
+          BLOCK_SIZE
+        };
+        SDL_RenderFillRect(renderer, &block);
+      }
+    }
+  }
 }
 
 int main() {
@@ -127,9 +163,9 @@ int main() {
   SDL_RenderSetLogicalSize(renderer, GAME_WIDTH, GAME_HEIGHT);
 
   /* Create current playing shape and state variables */
-  Shape* current_shape = create_shape();
+  Shape *current_shape = create_shape();
   unsigned int last_drop_time = SDL_GetTicks();
-  const unsigned int DROP_SPEED = 500;
+  const unsigned int DROP_SPEED = 350;
 
   /* Create SDL event for polling and variable for game loop on/off */
   int running = 1;
@@ -146,6 +182,8 @@ int main() {
 
     /* Drop current shape 
      * Drop test shape to see if current shape will hit floor next drop
+     * If current shape hits place it in matrix; generate new shape
+     * Else keep dropping
      */
     unsigned int current_time = SDL_GetTicks();
     if(current_time - last_drop_time > DROP_SPEED) {
@@ -153,6 +191,7 @@ int main() {
       move_shape(&test_shape, 0, 1);
 
       if(scan_bottom_collision(&test_shape)) {
+        place_shape(current_shape);
         free(current_shape);
         current_shape = create_shape();
       } else {
@@ -194,6 +233,9 @@ int main() {
       BLOCK_SIZE 
     };
     SDL_RenderFillRect(renderer, &bottom_border);
+
+    /* Render matrix/matrix shapes */
+    render_matrix(renderer);
 
     /* Render current shape */
     render_shape(renderer, current_shape);
