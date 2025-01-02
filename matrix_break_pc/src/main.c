@@ -1,3 +1,6 @@
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keyboard.h>
+#include <SDL2/SDL_scancode.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -17,6 +20,9 @@
 #define MATRIX_WIDTH 15
 #define MATRIX_HEIGHT 24
 #define BLOCK_SIZE 4
+
+/* Create variable for game loop on/off */
+int running = 1;
 
 /* Shapes and rotation state */
 typedef struct {
@@ -68,7 +74,6 @@ Shape *create_shape() {
       new_shape->shape[i][j] = SHAPES[rand_temp][i][j];
     }
   }
-
   return new_shape;
 }
 
@@ -76,6 +81,36 @@ Shape *create_shape() {
 void move_shape(Shape *shape, int dx, int dy) {
   shape->x += (dx * BLOCK_SIZE);
   shape->y += (dy * BLOCK_SIZE);
+}
+
+/* Handle inputs function */
+void handle_inputs(Shape *shape, uint32_t current_time, uint32_t *last_move_time) {
+  SDL_Event event;
+
+  /* Poll for events */
+  while (SDL_PollEvent(&event)) {
+    /* Look for quit event */
+    if (event.type == SDL_QUIT) running = 0;
+
+    /* Look for x axis movement inputs; call move shape */
+    static int key_held = 0;
+
+    if (event.type == SDL_KEYUP) key_held = 0;
+    if (event.type == SDL_KEYDOWN) {
+      if (!key_held && current_time - *last_move_time > 150) {
+        if (event.key.keysym.scancode == SDL_SCANCODE_LEFT && shape->x > BLOCK_SIZE) {
+          move_shape(shape, -1, 0);
+          *last_move_time = current_time;
+        }
+        /* Fix right wall detection */
+        if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT) {
+          move_shape(shape, 1, 0);
+          *last_move_time = current_time;
+        }
+        key_held = 1;
+      }
+    }
+  }
 }
 
 /* Render shape function */
@@ -125,7 +160,7 @@ void place_shape(const Shape *shape) {
   }
 }
 
-/* Render matrix/matrix shapes */
+/* Render matrix and placed matrix shapes */
 void render_matrix(SDL_Renderer *renderer) {
   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
@@ -165,27 +200,21 @@ int main() {
   /* Create current playing shape and state variables */
   Shape *current_shape = create_shape();
   unsigned int last_drop_time = SDL_GetTicks();
-  const unsigned int DROP_SPEED = 350;
-
-  /* Create SDL event for polling and variable for game loop on/off */
-  int running = 1;
-  SDL_Event event;
+  unsigned int last_move_time = SDL_GetTicks();
+  const unsigned int DROP_SPEED = 500;
 
   /* Run game loop */
   while(running) {
-    /* Poll for quit event */
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_QUIT) {
-        running = 0;
-      }
-    }
+    unsigned int current_time = SDL_GetTicks();
 
+    /* Handle various user inputs */
+    handle_inputs(current_shape, current_time, &last_move_time);
+   
     /* Drop current shape 
      * Drop test shape to see if current shape will hit floor next drop
      * If current shape hits place it in matrix; generate new shape
      * Else keep dropping
      */
-    unsigned int current_time = SDL_GetTicks();
     if(current_time - last_drop_time > DROP_SPEED) {
       Shape test_shape = *current_shape;
       move_shape(&test_shape, 0, 1);
