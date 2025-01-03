@@ -5,9 +5,10 @@ LDFLAGS = $(shell pkg-config --libs sdl2)
 BUILD_DIR = build
 SRC_DIR = src
 TARGET = $(BUILD_DIR)/bin
+SOURCES = $(wildcard) $(SRC_DIR)/*.c
 
 $(TARGET): $(SRC_DIR)/main.c 
-	$(CC) $(CFLAGS) $(SRC_DIR)/main.c -o $(TARGET) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(SOURCES) -o $(TARGET) $(LDFLAGS)
 
 clean:
 	rm -f $(TARGET)

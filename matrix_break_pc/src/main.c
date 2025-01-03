@@ -1,87 +1,11 @@
+#include "../include/shape.h"
+#include "../include/config.h"
+#include "../include/globals.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_scancode.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <SDL2/SDL.h>
 #include <time.h>
-
-#define OLED_WIDTH 128
-#define OLED_HEIGHT 64
-
-/* Define dimensions rotated from OLED */
-#define GAME_WIDTH 64
-#define GAME_HEIGHT 128
-#define WINDOW_WIDTH 128
-#define WINDOW_HEIGHT 258
-
-/* Gameplay matrix units in blocks; define block size in px */
-#define MATRIX_WIDTH 15
-#define MATRIX_HEIGHT 24
-#define BLOCK_SIZE 4
-
-/* Create variable for game loop on/off */
-int running = 1;
-
-/* Shapes and rotation state */
-typedef struct {
-  uint8_t shape[4][4];
-  int x, y;
-  int rotation;
-} Shape;
-
-/* Shape templates 3d array */
-const uint8_t SHAPES[][4][4] = {
-  {
-    {1,1,1,1},
-    {0,0,0,0},
-    {0,0,0,0},
-    {0,0,0,0}
-  },
-  {
-    {1,0,0,0},
-    {0,0,0,0},
-    {0,0,0,0},
-    {0,0,0,0}
-  },
-  {
-    {1,1,0,0},
-    {1,1,0,0},
-    {0,0,0,0},
-    {0,0,0,0}
-  }
-};
-
-/* Init game matrix array to host placed shapes */
-uint8_t game_matrix[MATRIX_WIDTH][MATRIX_HEIGHT] = {0};
-
-/* Create shape function */
-Shape *create_shape() {
-  Shape *new_shape = malloc(sizeof(Shape));
-
-  /* Init x, y, rotation */
-  new_shape->x = (MATRIX_WIDTH / 2) * BLOCK_SIZE;
-  new_shape->y = 0;
-  new_shape->rotation = 0;
-
-  /* Pick random shape */
-  int rand_temp = rand() % 3;
-
-  /* Copy shape data from template */
-  for(int i = 0; i < 4; i++) {
-    for(int j = 0; j < 4; j++) {
-      new_shape->shape[i][j] = SHAPES[rand_temp][i][j];
-    }
-  }
-  return new_shape;
-}
-
-/* Move shape function */
-void move_shape(Shape *shape, int dx, int dy) {
-  shape->x += (dx * BLOCK_SIZE);
-  shape->y += (dy * BLOCK_SIZE);
-}
 
 /* Handle inputs function */
 void handle_inputs(Shape *shape, uint32_t current_time, uint32_t *last_move_time) {
@@ -279,5 +203,6 @@ int main() {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
+
   return 0;
 }
