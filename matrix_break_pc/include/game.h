@@ -1,8 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
-void init_game();
-void update_game();
-void render_game();
+#include "shape.h"
+
+void place_shape(const Shape *shape);
+int scan_bottom_collision(const Shape *shape);
 
 #endif

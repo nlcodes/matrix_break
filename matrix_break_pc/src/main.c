@@ -1,41 +1,14 @@
-#include "../include/shape.h"
 #include "../include/config.h"
 #include "../include/globals.h"
+#include "../include/shape.h"
 #include "../include/render.h"
 #include "../include/input.h"
+#include "../include/game.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_scancode.h>
 #include <time.h>
-
-/* Floor collision detection */
-int scan_bottom_collision(const Shape *shape) {
-  for(int i = 0; i < 4; i++) {
-    for(int j = 0; j < 4; j++) {
-      if(shape->shape[i][j]) {
-        int block_bottom = shape->y + ((i + 1) * BLOCK_SIZE);
-        if (block_bottom >= MATRIX_HEIGHT * BLOCK_SIZE) {
-          return 1;
-        }
-      }
-    }
-  }
-  return 0;
-}
-
-/* Place shapes into matrix once hit detected with floor */
-void place_shape(const Shape *shape) {
-  for(int i = 0; i < 4; i++) {
-    for(int j = 0; j < 4; j++) {
-      if(shape->shape[i][j]) {
-        int matrix_x = shape->x / BLOCK_SIZE + j;
-        int matrix_y = shape->y / BLOCK_SIZE + i + 1;
-        game_matrix[matrix_x][matrix_y] = 1;
-      }
-    }
-  }
-}
 
 int main() {
   /* Seed rng with current time */
