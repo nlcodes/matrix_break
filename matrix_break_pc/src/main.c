@@ -1,10 +1,11 @@
 #include "../include/shape.h"
 #include "../include/config.h"
 #include "../include/globals.h"
+#include "../include/render.h"
+#include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_scancode.h>
-#include <SDL2/SDL.h>
 #include <time.h>
 
 /* Handle inputs function */
@@ -37,25 +38,6 @@ void handle_inputs(Shape *shape, uint32_t current_time, uint32_t *last_move_time
   }
 }
 
-/* Render shape function */
-void render_shape(SDL_Renderer *renderer, const Shape *shape) {
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-  for(int i = 0; i < 4; i++) {
-    for(int j = 0; j < 4; j++) {
-      if(shape->shape[i][j]) {
-        SDL_Rect block = {
-          shape->x + (j * BLOCK_SIZE),
-          shape->y + (i * BLOCK_SIZE),
-          BLOCK_SIZE,
-          BLOCK_SIZE
-        };
-        SDL_RenderFillRect(renderer, &block);
-      }
-    }
-  }
-}
-
 /* Floor collision detection */
 int scan_bottom_collision(const Shape *shape) {
   for(int i = 0; i < 4; i++) {
@@ -79,25 +61,6 @@ void place_shape(const Shape *shape) {
         int matrix_x = shape->x / BLOCK_SIZE + j;
         int matrix_y = shape->y / BLOCK_SIZE + i + 1;
         game_matrix[matrix_x][matrix_y] = 1;
-      }
-    }
-  }
-}
-
-/* Render matrix and placed matrix shapes */
-void render_matrix(SDL_Renderer *renderer) {
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-  for(int i = 0; i < MATRIX_WIDTH; i++) {
-    for(int j = 0; j < MATRIX_HEIGHT; j++) {
-      if(game_matrix[i][j]) {
-        SDL_Rect block = {
-          i * BLOCK_SIZE,
-          j * BLOCK_SIZE,
-          BLOCK_SIZE,
-          BLOCK_SIZE
-        };
-        SDL_RenderFillRect(renderer, &block);
       }
     }
   }
@@ -157,35 +120,8 @@ int main() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    /* Render border */ 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-    /* Left border */
-    SDL_Rect left_border = {
-      0,
-      0,
-      BLOCK_SIZE,
-      MATRIX_HEIGHT * BLOCK_SIZE
-    };
-    SDL_RenderFillRect(renderer, &left_border);
-
-    /* Right border */
-    SDL_Rect right_border = {
-      MATRIX_WIDTH * BLOCK_SIZE,
-      0,
-      BLOCK_SIZE,
-      MATRIX_HEIGHT * BLOCK_SIZE
-    };
-    SDL_RenderFillRect(renderer, &right_border);
-
-    /* Bottom border */
-    SDL_Rect bottom_border = {
-      0,
-      MATRIX_HEIGHT * BLOCK_SIZE,
-      (MATRIX_WIDTH + 1) * BLOCK_SIZE,
-      BLOCK_SIZE 
-    };
-    SDL_RenderFillRect(renderer, &bottom_border);
+    /* Remder matrix border */
+    render_border(renderer);
 
     /* Render matrix/matrix shapes */
     render_matrix(renderer);
