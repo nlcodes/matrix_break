@@ -1,8 +1,9 @@
 #include "../include/game.h"
 #include "../include/globals.h"
+#include "../include/config.h"
 
 /* Floor collision detection */
-int scan_bottom_collision(const Shape *shape) {
+int scan_bottom_collision(const shape *shape) {
   for(int i = 0; i < 4; i++) {
     for(int j = 0; j < 4; j++) {
       if(shape->shape[i][j]) {
@@ -17,7 +18,7 @@ int scan_bottom_collision(const Shape *shape) {
 }
 
 /* Place shapes into matrix once hit detected with floor */
-void place_shape(const Shape *shape) {
+void place_shape(const shape *shape) {
   for(int i = 0; i < 4; i++) {
     for(int j = 0; j < 4; j++) {
       if(shape->shape[i][j]) {

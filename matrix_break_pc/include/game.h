@@ -3,7 +3,7 @@
 
 #include "shape.h"
 
-void place_shape(const Shape *shape);
-int scan_bottom_collision(const Shape *shape);
+void place_shape(const shape *shape);
+int scan_bottom_collision(const shape *shape);
 
 #endif

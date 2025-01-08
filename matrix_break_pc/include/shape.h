@@ -9,9 +9,9 @@ typedef struct {
   uint8_t shape[BLOCK_SIZE][BLOCK_SIZE];
   int x, y;
   int rotation;
-} Shape;
+} shape;
 
-Shape *create_shape();
-void move_shape(Shape *shape, int dx, int dy);
+shape *create_shape();
+void move_shape(shape *shape, int dx, int dy);
 
 #endif

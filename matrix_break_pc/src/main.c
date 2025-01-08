@@ -5,9 +5,7 @@
 #include "../include/input.h"
 #include "../include/game.h"
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_keyboard.h>
-#include <SDL2/SDL_scancode.h>
+#include <stdlib.h>
 #include <time.h>
 
 int main() {
@@ -29,7 +27,7 @@ int main() {
   SDL_RenderSetLogicalSize(renderer, GAME_WIDTH, GAME_HEIGHT);
 
   /* Create current playing shape and state variables */
-  Shape *current_shape = create_shape();
+  shape *current_shape = create_shape();
   unsigned int last_drop_time = SDL_GetTicks();
   unsigned int last_move_time = SDL_GetTicks();
   const unsigned int DROP_SPEED = 500;
@@ -47,7 +45,7 @@ int main() {
      * Else keep dropping
      */
     if(current_time - last_drop_time > DROP_SPEED) {
-      Shape test_shape = *current_shape;
+      shape test_shape = *current_shape;
       move_shape(&test_shape, 0, 1);
 
       if(scan_bottom_collision(&test_shape)) {

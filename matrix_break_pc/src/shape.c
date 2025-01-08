@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 /* Create shape function */
-Shape *create_shape() {
-  Shape *new_shape = malloc(sizeof(Shape));
+shape *create_shape() {
+  shape *new_shape = malloc(sizeof(shape));
 
   /* Init x, y, rotation */
   new_shape->x = (MATRIX_WIDTH / 2) * BLOCK_SIZE;
@@ -26,7 +26,7 @@ Shape *create_shape() {
 }
 
 /* Move shape function */
-void move_shape(Shape *shape, int dx, int dy) {
+void move_shape(shape *shape, int dx, int dy) {
   shape->x += (dx * BLOCK_SIZE);
   shape->y += (dy * BLOCK_SIZE);
 }

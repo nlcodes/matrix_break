@@ -3,7 +3,7 @@
 #include "../include/globals.h"
 
 /* Render shape function */
-void render_shape(SDL_Renderer *renderer, const Shape *shape) {
+void render_shape(SDL_Renderer *renderer, const shape *shape) {
   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
   for(int i = 0; i < 4; i++) {
