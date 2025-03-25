@@ -1,0 +1,146 @@
+hal
+
+About:
+  This file serves as documentation for stm32_hal
+  Specifically, this covers the functions contained in the hal,
+  what they accomplish, and how to go about implementing them
+
+Instructions:
+  Intrustions regarding how to use the hal are included in the master
+  directory of stm32_hal, in the readme.txt file located there
+
+HAL Function Instructions and Explainations:
+
+NOTE:
+  It is very important to initialize interrupts first
+  then initialize all peripherals after, and initialize 
+  each according to the instructions below 
+  After initializing interrupts and then peripherals,
+  you may begin calling other functions in your program 
+  related to both to manipulate as needed
+  Please read the docs carefully
+
+Interrupts:
+  Functions pertaining to interrupts implementation in hal library
+  as well as how to use them in your program
+
+  Init function for timer interrupt
+  Must be called first before calling any other hal functions 
+  Takes argument for delay time in ns
+  Function is called once per program when using hal
+  This initializes the timer interrupt for re use 
+  You can then use other hal functions below to
+  check if the delay is done,
+  reset the timer, and change the delay timing
+  Timer interrupts must be initialized before any
+  peripherals are initialized as stated above
+  They are essential to the init code of other peripherals
+
+  The argument delay_ns just sets the default ARR interrupt delay time
+  This is automatically changed by any peripheral init functions 
+  for the delay needed using interrupt timers in the driver code 
+  that initializes those particular peripherals 
+  So, it does not matter much what this value is, as it will 
+  likely be reset upon the init of any peripheral 
+  It was included as an argument so one can use timer interrupts 
+  in a program without calling the change delay function if the 
+  program being written does not contain peripherals, and only needs 
+  one delay time 
+    void hal_timer_interrupt_init(uint32_t delay_ns);
+
+  Checks to see if delay is done
+  Function returns 1 if delay is done and 0 if not
+    uint8_t hal_timer_interrupt_check();
+
+  Resets interrupt timer 
+  State returned during timer check now == 0
+    void hal_timer_interrupt_reset();
+
+  Change delay timing initially set with hal_timer_interrupt_init()
+  Takes argument for delay time in ns
+    void hal_timer_interrupt_change_delay(uint32_t delay_ns);
+
+  EXAMPLE USAGE:
+    An example how one might use a timer interrupt delay in code 
+    using these functions would be to make sure 
+    interrupts are initialized, 
+    set a delay time you would like to use, reset the timer,
+    and then use a while loop for instance to check if 
+    delay is over using check delay function 
+    When the delay is over program continues 
+    Continue with this pattern as needed
+
+OLED:
+  Functions which cover initialization and writing data to
+  128x64 ssd1306 oled using i2c protocol
+
+  Initializes oled using i2c
+  Call this function before any write functions
+    void hal_display_init();
+
+  Writes pixels to the oled screen
+  Takes an array of hex values as first argument
+  These hex values represent 8 pixels represented by either 1 or 0
+  It then takes column and row as arguments to determine the location
+  to begin writing the data 
+  Finally it takes width and height of the image as its last argument,
+  so it can determine where the data is to stop being written
+  Width value is in pixels while height is in oled pages
+    void hal_display_write(uint8_t *data, uint8_t col, uint8_t page, uint8_t width, uint8_t height);
+    
+  Fills the whole screen with either white (0xFF) or black (0x00) pixels
+    void hal_display_fill(uint8_t data);
+
+  Writes any 128x64 bitmap data to the oled
+  Takes array of the data as an argument expecting hex values
+    void hal_display_write_bitmap(uint8_t *bitmap_data);
+
+
+    Buffer Functions:
+      Functions pertaining to writing to display from a buffer 
+      instead of writing directly to display 
+      This can helps to ensure graphics update all at once instead of 
+      bit by bit throughout the program, giving a more natural feel
+
+      Sets a specific pixel at x/y location given state (1/0 (black/white))
+        void hal_buffer_set_pixel(uint8_t x, uint8_t y, uint8_t state);
+
+      Writes the entire 128x64 px buffer to the display 
+      Call this when you would like to refresh graphics after writing to 
+      the buffer array
+        void hal_buffer_write();
+
+        Binary Buffer Functions:
+          Writes a binary array of 1s and 0s to the the buffer
+            void hal_draw_binary_data(const uint8_t *data, uint8_t width, uint8_t height, uint8_t x, uint8_t y);
+          
+          Unwrites a binary array of 1s and 0s to the buffer (writes black over white px) 
+            void hal_clear_binary_data(const uint8_t *data, uint8_t width, uint8_t height, uint8_t x, uint8_t y);
+
+Button Matrix:
+  Functions which cover initialization and reading button inputs
+  from 4x4 button matrix using gpio
+  
+  Call first to initialize gpio for reading and writing button matrix
+    void hal_gpio_init();
+  
+  Takes array as input
+  Manages state for button board after passing an array 
+  created in program using the hal function
+  Stores button state in passed array as being pressed (1) or released (0)
+  After figuring where each index is mapped to each button (they are
+  sequencially mapped) do some action based on button state as required
+  by program
+    void hal_read_write_buttons(volatile uint8_t *matrix_buttons);
+
+Test Led:
+  Functions which allow blinking or toggling on/off for
+  the test led on board the stm32 
+  Useful for debugging purposes
+
+  Takes either 1 or 0 as input for on/off toggling
+  Called as needed to switch state
+    void hal_led_on_off(volatile uint8_t running);
+
+  Indefinitely blinks test led
+    void hal_led_blink();
